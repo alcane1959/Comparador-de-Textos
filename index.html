@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comparador de Textos</title>
+<style>
+:root{color-scheme:light;--bg:#f3f6fb;--card:#fff;--soft:#f8fafc;--text:#172033;--muted:#667085;--line:#d8dee9;--blue:#2457d6;--yellow:#fff29a;--red:#b42318;--redbg:#ffe0e0;--shadow:0 8px 28px #10182814}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0f1522;--card:#171f2f;--soft:#111827;--text:#edf2f7;--muted:#aab4c3;--line:#334057;--blue:#78a2ff;--yellow:#6a5e00;--red:#ff9f97;--redbg:#532727;--shadow:0 8px 28px #0005}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.app{max-width:1600px;margin:auto;padding:20px}h1{margin:0 0 6px}.sub,.status,.note{color:var(--muted)}.toolbar,.head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.toolbar{margin:16px 0;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}button,.file{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--text);font-weight:650;cursor:pointer}.file input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.primary{background:var(--blue);color:#fff}.danger{color:var(--red)}.space{flex:1}.status{min-height:1.5em}.error{color:var(--red)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}.head{justify-content:space-between;padding:12px 14px;background:var(--soft);border-bottom:1px solid var(--line)}.head h2{font-size:1rem;margin:0}.actions{display:flex;flex-wrap:wrap;gap:7px}.actions button,.actions .file{font-size:.84rem;padding:6px 9px}textarea{display:block;width:100%;min-height:360px;resize:vertical;border:0;padding:16px;background:var(--card);color:var(--text);font:14px/1.55 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4}textarea:focus{outline:3px solid #8fb4ff;outline-offset:-3px}.comparison{margin-top:14px}.stats{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px 0}.pill{padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--soft);font-size:.84rem}.diff{margin:0;min-height:280px;max-height:58vh;overflow:auto;padding:16px;white-space:break-spaces;overflow-wrap:anywhere;tab-size:4;font:14px/1.55 Consolas,monospace}ins{background:var(--yellow);color:var(--text);text-decoration:none;border-bottom:2px solid #d6b900}del{background:var(--redbg);color:var(--red);text-decoration-thickness:2px}.note{margin-top:14px;padding:11px 13px;border-left:4px solid var(--blue);background:var(--card);border-radius:8px;font-size:.9rem}dialog{max-width:620px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text)}dialog li{margin:.5em 0}.print-only{display:none}
+@media(max-width:850px){.app{padding:12px}.grid{grid-template-columns:1fr}textarea{min-height:280px}}
+@media print{header,.toolbar,.grid,.note{display:none!important}.app{padding:0}.panel{border:0;box-shadow:none}.diff{max-height:none!important;min-height:0;overflow:visible!important;white-space:break-spaces;tab-size:4}body.print-altered .comparison{display:none!important}body.print-altered #printAlteredPanel,body.print-altered #printAlteredPanel .head,body.print-altered #printAltered{display:block!important;visibility:visible!important;color:#000!important;background:#fff!important}body.print-comparison #printAlteredPanel{display:none!important}body.print-comparison .comparison,body.print-comparison .comparison .head,body.print-comparison .stats,body.print-comparison .comparison .diff{display:block!important;visibility:visible!important}body.print-comparison .comparison{margin:0}body.print-comparison ins{background:#fff29a!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body.print-comparison del{background:#ffe0e0!important;color:#b42318!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body><main class="app">
+<header><h1>Comparador de Textos</h1><p class="sub">Cole, edite ou importe os dois documentos. A comparação é atualizada automaticamente, caractere por caractere.</p></header>
+<section class="toolbar"><button type="button" id="swap">Inverter textos</button><button type="button" id="clearAll" class="danger">Limpar tudo</button><span class="space"></span><button type="button" id="pdf" class="primary">Exportar PDF - texto editável</button><button type="button" id="pdfComparison">Exportar PDF - comparação</button><button type="button" id="help">Ajuda</button></section>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+<section class="grid">
+<article class="panel"><div class="head"><h2>Texto original</h2><div class="actions"><label class="file">Importar DOCX/PDF/TXT<input id="fileA" type="file" accept=".docx,.pdf,.txt"></label><button type="button" id="pasteA">Colar</button><button type="button" id="clearA" class="danger">Limpar</button></div></div><textarea id="a" spellcheck="true" placeholder="Cole ou importe o texto original aqui..."></textarea></article>
+<article class="panel"><div class="head"><h2>Texto alterado, editável</h2><div class="actions"><label class="file">Importar DOCX/PDF/TXT<input id="fileB" type="file" accept=".docx,.pdf,.txt"></label><button type="button" id="pasteB">Colar</button><button type="button" id="clearB" class="danger">Limpar</button></div></div><textarea id="b" spellcheck="true" placeholder="Cole, importe ou edite o texto alterado aqui..."></textarea></article>
+</section>
+<article class="panel comparison"><div class="head"><h2>Comparação em tempo real</h2><span class="legend">Amarelo: incluído/alterado &nbsp; Vermelho: removido</span></div><div class="stats"><span class="pill" id="adds">Inclusões: 0</span><span class="pill" id="rems">Remoções: 0</span><span class="pill" id="blocks">Blocos alterados: 0</span></div><pre id="out" class="diff">A comparação aparecerá aqui.</pre></article>
+<article id="printAlteredPanel" class="panel print-only"><div class="head"><h2>Texto alterado</h2></div><pre id="printAltered" class="diff"></pre></article>
+<p class="note"><strong>Formatação:</strong> o aplicativo reconstrói o alinhamento do PDF em uma grade textual, preservando recuos, parágrafos, quebras de linha e linhas em branco na importação e na exportação. Em PDFs, a extração depende da estrutura interna do arquivo; PDFs digitalizados precisam de OCR.</p>
+</main>
+<dialog id="dlg"><h2>Ajuda</h2><ul><li>No campo <strong>Texto original</strong>, cole o conteúdo ou importe um arquivo DOCX, PDF ou TXT.</li><li>No campo <strong>Texto alterado</strong>, cole, importe ou edite a nova versão. A comparação é atualizada automaticamente durante a edição.</li><li>Os trechos incluídos ou alterados aparecem em amarelo. Os removidos aparecem em vermelho e riscados.</li><li>A comparação considera cada caractere, incluindo palavras, números, espaços, vírgulas, pontuação, tabulações, parágrafos, quebras de linha e linhas em branco.</li><li>O botão <strong>Limpar</strong> de cada painel apaga apenas aquele texto. <strong>Limpar tudo</strong> apaga os dois.</li><li><strong>Exportar PDF</strong> abre a janela de impressão; escolha “Salvar como PDF”.</li></ul><form method="dialog"><button class="primary">Fechar</button></form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/diff@5.2.0/dist/diff.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.13.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const pdfjsLib=window['pdfjs-dist/build/pdf']||null;if(pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
+const $=id=>document.getElementById(id),a=$('a'),b=$('b'),out=$('out'),status=$('status');let timer;
+function msg(t,e=false){status.textContent=t;status.classList.toggle('error',e)}
+function esc(v){return v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function compare(){const x=a.value,y=b.value;if(!x&&!y){out.textContent='A comparação aparecerá aqui.';$('adds').textContent='Inclusões: 0';$('rems').textContent='Remoções: 0';$('blocks').textContent='Blocos alterados: 0';return}if(!window.Diff){out.textContent=y||x;msg('A biblioteca de comparação não foi carregada.',true);return}let ad=0,rm=0,bl=0;out.innerHTML=window.Diff.diffChars(x,y).map(p=>{const s=esc(p.value);if(p.added){ad+=[...p.value].length;bl++;return `<ins>${s}</ins>`}if(p.removed){rm+=[...p.value].length;bl++;return `<del>${s}</del>`}return s}).join('');$('adds').textContent=`Inclusões: ${ad}`;$('rems').textContent=`Remoções: ${rm}`;$('blocks').textContent=`Blocos alterados: ${bl}`}
+function schedule(){clearTimeout(timer);timer=setTimeout(compare,90)}
+async function pdfText(f){
+  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise;
+  const pages=[];
+  for(let n=1;n<=pdf.numPages;n++){
+    msg(`Lendo PDF: página ${n} de ${pdf.numPages}...`);
+    const page=await pdf.getPage(n);
+    const content=await page.getTextContent({disableCombineTextItems:false});
+    const items=content.items.filter(i=>typeof i.str==='string'&&i.str.length);
+    if(!items.length){pages.push('');continue;}
+
+    const charWidths=items
+      .filter(i=>i.str.trim().length&&i.width>0)
+      .map(i=>i.width/Math.max(1,[...i.str].length))
+      .filter(v=>v>1&&v<20)
+      .sort((a,b)=>a-b);
+    const charWidth=charWidths.length?charWidths[Math.floor(charWidths.length/2)]:6;
+    const xValues=items.map(i=>i.transform[4]).sort((a,b)=>a-b);
+    const left=xValues[Math.max(0,Math.floor(xValues.length*.02))];
+
+    const rawLines=[];
+    for(const i of items){
+      const x=i.transform[4],y=i.transform[5],height=Math.abs(i.height||i.transform[3]||12);
+      const tolerance=Math.max(1.5,height*.22);
+      let line=rawLines.find(r=>Math.abs(r.y-y)<=tolerance);
+      if(!line){line={y,height,items:[]};rawLines.push(line)}
+      line.items.push({x,text:i.str,width:i.width||([...i.str].length*charWidth)});
+      line.height=Math.max(line.height,height);
+    }
+    rawLines.sort((a,b)=>b.y-a.y);
+
+    const verticalGaps=[];
+    for(let i=1;i<rawLines.length;i++){
+      const gap=rawLines[i-1].y-rawLines[i].y;
+      if(gap>4&&gap<40)verticalGaps.push(gap);
+    }
+    verticalGaps.sort((a,b)=>a-b);
+    const normalGap=verticalGaps.length?verticalGaps[Math.floor(verticalGaps.length/2)]:14;
+
+    const rendered=[];
+    let previous=null;
+    for(const line of rawLines){
+      if(previous){
+        const gap=previous.y-line.y;
+        const blankLines=Math.max(0,Math.round(gap/normalGap)-1);
+        for(let k=0;k<blankLines;k++)rendered.push('');
+      }
+      line.items.sort((a,b)=>a.x-b.x);
+      let text='',cursor=left;
+      for(const item of line.items){
+        const spaces=Math.max(0,Math.round((item.x-cursor)/charWidth));
+        if(spaces>0)text+=' '.repeat(spaces);
+        text+=item.text;
+        cursor=Math.max(cursor,item.x+item.width);
+      }
+      rendered.push(text.replace(/\s+$/,''));
+      previous=line;
+    }
+    pages.push(rendered.join('\n'));
+  }
+  return pages.join('\n\n');
+}
+async function docxText(f){
+  const result=await window.mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()});
+  return result.value.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+}
+async function load(f,target,input){if(!f)return;try{msg(`Importando ${f.name}...`);const ext=(f.name.split('.').pop()||'').toLowerCase();if(ext==='pdf'){if(!pdfjsLib)throw new Error('Leitor de PDF não carregado. Verifique a conexão com a internet.');target.value=await pdfText(f)}else if(ext==='docx'){if(!window.mammoth)throw new Error('Leitor de Word não carregado. Verifique a conexão com a internet.');target.value=await docxText(f)}else if(ext==='txt'||f.type.startsWith('text/')){target.value=await f.text()}else{throw new Error('Formato não compatível. Use DOCX, PDF ou TXT.')}target.scrollTop=0;compare();msg(`${f.name} importado com sucesso.`)}catch(e){console.error(e);msg(`Não foi possível importar ${f.name}: ${e.message}`,true)}finally{if(input)input.value=''}}
+async function paste(target){try{const t=await navigator.clipboard.readText(),s=target.selectionStart??target.value.length,e=target.selectionEnd??target.value.length;target.value=target.value.slice(0,s)+t+target.value.slice(e);compare()}catch{target.focus();msg('Use Ctrl+V ou Cmd+V para colar.',true)}}
+function download(name,content,type){const u=URL.createObjectURL(new Blob([content],{type})),l=document.createElement('a');l.href=u;l.download=name;l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+a.addEventListener('input',schedule);b.addEventListener('input',schedule);$('fileA').addEventListener('change',e=>load(e.target.files[0],a,e.target));$('fileB').addEventListener('change',e=>load(e.target.files[0],b,e.target));$('pasteA').onclick=()=>paste(a);$('pasteB').onclick=()=>paste(b);$('clearA').onclick=()=>{a.value='';compare();a.focus()};$('clearB').onclick=()=>{b.value='';compare();b.focus()};$('clearAll').onclick=()=>{a.value=b.value='';compare();a.focus()};$('swap').onclick=()=>{[a.value,b.value]=[b.value,a.value];compare()};function printMode(mode){document.body.classList.remove('print-altered','print-comparison');document.body.classList.add(mode);requestAnimationFrame(()=>requestAnimationFrame(()=>window.print()))}window.addEventListener('afterprint',()=>document.body.classList.remove('print-altered','print-comparison'));$('pdf').onclick=()=>{$('printAltered').textContent=b.value;printMode('print-altered')};$('pdfComparison').onclick=()=>{compare();printMode('print-comparison')};$('help').onclick=()=>$('dlg').showModal();compare();
+</script></body></html>
